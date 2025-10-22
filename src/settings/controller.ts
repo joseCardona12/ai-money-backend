@@ -10,7 +10,15 @@ export class SettingController {
     res: Response
   ): Promise<void> {
     try {
-      const { region, timezone, notification_enabled, plan_id, security_level_id, currency_id, language_id } = req.body;
+      const {
+        region,
+        timezone,
+        notification_enabled,
+        plan_id,
+        security_level_id,
+        currency_id,
+        language_id,
+      } = req.body;
       const userId = req.user!.id; // User ID from JWT token
 
       // Validate required fields for creation
@@ -43,7 +51,10 @@ export class SettingController {
         language_id,
       };
 
-      const setting = await SettingService.createOrUpdateUserSetting(userId, settingData);
+      const setting = await SettingService.createOrUpdateUserSetting(
+        userId,
+        settingData
+      );
 
       res.status(200).json({
         message: "Settings saved successfully",
@@ -108,19 +119,32 @@ export class SettingController {
   ): Promise<void> {
     try {
       const userId = req.user!.id; // User ID from JWT token
-      const { region, timezone, notification_enabled, plan_id, security_level_id, currency_id, language_id } = req.body;
+      const {
+        region,
+        timezone,
+        notification_enabled,
+        plan_id,
+        security_level_id,
+        currency_id,
+        language_id,
+      } = req.body;
 
       // Update data
       const updateData: any = {};
       if (region !== undefined) updateData.region = region;
       if (timezone !== undefined) updateData.timezone = timezone;
-      if (notification_enabled !== undefined) updateData.notification_enabled = notification_enabled;
+      if (notification_enabled !== undefined)
+        updateData.notification_enabled = notification_enabled;
       if (plan_id !== undefined) updateData.plan_id = plan_id;
-      if (security_level_id !== undefined) updateData.security_level_id = security_level_id;
+      if (security_level_id !== undefined)
+        updateData.security_level_id = security_level_id;
       if (currency_id !== undefined) updateData.currency_id = currency_id;
       if (language_id !== undefined) updateData.language_id = language_id;
 
-      const updatedSetting = await SettingService.updateSettingByUserId(userId, updateData);
+      const updatedSetting = await SettingService.updateSettingByUserId(
+        userId,
+        updateData
+      );
 
       res.status(200).json({
         message: "Settings updated successfully",
@@ -169,6 +193,49 @@ export class SettingController {
         });
       } else {
         console.error("Unexpected error in toggleNotifications:", error);
+        res.status(500).json({
+          message: "Internal server error",
+          status: 500,
+          code: "INTERNAL_SERVER_ERROR",
+        });
+      }
+    }
+  }
+
+  // Get setting by user ID (admin only)
+  public static async getSettingByUserId(
+    req: AuthenticatedRequest,
+    res: Response
+  ): Promise<void> {
+    try {
+      const { userId } = req.params;
+      const parsedUserId = parseInt(userId);
+
+      if (isNaN(parsedUserId)) {
+        res.status(400).json({
+          message: "Invalid user ID",
+          status: 400,
+          code: "VALIDATION_ERROR",
+        });
+        return;
+      }
+
+      const setting = await SettingService.getSettingByUserId(parsedUserId);
+
+      res.status(200).json({
+        message: "Setting retrieved successfully",
+        status: 200,
+        data: setting,
+      });
+    } catch (error: unknown) {
+      if (error instanceof CustomError) {
+        res.status(error.statusCode).json({
+          message: error.message,
+          status: error.statusCode,
+          code: error.code,
+        });
+      } else {
+        console.error("Unexpected error in getSettingByUserId:", error);
         res.status(500).json({
           message: "Internal server error",
           status: 500,
@@ -239,9 +306,12 @@ export class SettingController {
         return;
       }
 
-      const updatedSetting = await SettingService.updateSettingByUserId(userId, {
-        notification_enabled,
-      });
+      const updatedSetting = await SettingService.updateSettingByUserId(
+        userId,
+        {
+          notification_enabled,
+        }
+      );
 
       res.status(200).json({
         message: "Notification preference updated successfully",
@@ -256,7 +326,10 @@ export class SettingController {
           code: error.code,
         });
       } else {
-        console.error("Unexpected error in updateNotificationPreference:", error);
+        console.error(
+          "Unexpected error in updateNotificationPreference:",
+          error
+        );
         res.status(500).json({
           message: "Internal server error",
           status: 500,
@@ -284,9 +357,12 @@ export class SettingController {
         return;
       }
 
-      const updatedSetting = await SettingService.updateSettingByUserId(userId, {
-        timezone,
-      });
+      const updatedSetting = await SettingService.updateSettingByUserId(
+        userId,
+        {
+          timezone,
+        }
+      );
 
       res.status(200).json({
         message: "Timezone updated successfully",
@@ -329,9 +405,12 @@ export class SettingController {
         return;
       }
 
-      const updatedSetting = await SettingService.updateSettingByUserId(userId, {
-        language_id,
-      });
+      const updatedSetting = await SettingService.updateSettingByUserId(
+        userId,
+        {
+          language_id,
+        }
+      );
 
       res.status(200).json({
         message: "Language preference updated successfully",

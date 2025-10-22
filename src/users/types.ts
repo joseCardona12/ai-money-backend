@@ -8,7 +8,18 @@ export interface CreateUserData {
   profile_picture: string;
   role_id: number;
   provider_id: number;
+  plan_id?: number;
   join_date?: Date;
+}
+
+export interface UpdateUserData {
+  fullName?: string;
+  email?: string;
+  phone_number?: string;
+  address?: string;
+  bio?: string;
+  profile_picture?: string;
+  plan_id?: number;
 }
 
 export interface UserResponse {
@@ -22,4 +33,5 @@ export interface UserResponse {
   join_date: Date;
   role_id: number;
   provider_id: number;
+  plan_id?: number;
 }

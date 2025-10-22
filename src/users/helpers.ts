@@ -15,6 +15,7 @@ export class UserHelpers {
       join_date: user.join_date,
       role_id: user.role_id,
       provider_id: user.provider_id,
+      plan_id: user.plan_id,
     };
   }
 

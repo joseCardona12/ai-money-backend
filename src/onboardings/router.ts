@@ -21,3 +21,6 @@ onboardingRouter.post("/complete", OnboardingController.completeOnboarding);
 
 // GET /api/onboardings/status - Check onboarding status
 onboardingRouter.get("/status", OnboardingController.getOnboardingStatus);
+
+// GET /api/onboardings/check - Check if user has onboarding record
+onboardingRouter.get("/check", OnboardingController.checkUserHasOnboarding);

@@ -18,7 +18,9 @@ export class AccountController {
         res.status(400).json({
           message: "Account name is required and must be a string",
           status: 400,
-          code: "VALIDATION_ERROR",
+          data: {
+            error: "Account name is required and must be a string",
+          },
         });
         return;
       }
@@ -44,14 +46,18 @@ export class AccountController {
         res.status(error.statusCode).json({
           message: error.message,
           status: error.statusCode,
-          code: error.code,
+          data: {
+            error: error.message,
+          },
         });
       } else {
         console.error("Unexpected error in createAccount:", error);
         res.status(500).json({
           message: "Internal server error",
           status: 500,
-          code: "INTERNAL_SERVER_ERROR",
+          data: {
+            error: "Internal server error",
+          },
         });
       }
     }
@@ -77,14 +83,18 @@ export class AccountController {
         res.status(error.statusCode).json({
           message: error.message,
           status: error.statusCode,
-          code: error.code,
+          data: {
+            error: error.message,
+          },
         });
       } else {
         console.error("Unexpected error in getUserAccounts:", error);
         res.status(500).json({
           message: "Internal server error",
           status: 500,
-          code: "INTERNAL_SERVER_ERROR",
+          data: {
+            error: "Internal server error",
+          },
         });
       }
     }
@@ -103,7 +113,9 @@ export class AccountController {
         res.status(400).json({
           message: "Invalid account ID",
           status: 400,
-          code: "VALIDATION_ERROR",
+          data: {
+            error: "Invalid account ID",
+          },
         });
         return;
       }
@@ -120,14 +132,18 @@ export class AccountController {
         res.status(error.statusCode).json({
           message: error.message,
           status: error.statusCode,
-          code: error.code,
+          data: {
+            error: error.message,
+          },
         });
       } else {
         console.error("Unexpected error in getAccountById:", error);
         res.status(500).json({
           message: "Internal server error",
           status: 500,
-          code: "INTERNAL_SERVER_ERROR",
+          data: {
+            error: "Internal server error",
+          },
         });
       }
     }
@@ -146,7 +162,9 @@ export class AccountController {
         res.status(400).json({
           message: "Invalid account ID",
           status: 400,
-          code: "VALIDATION_ERROR",
+          data: {
+            error: "Invalid account ID",
+          },
         });
         return;
       }
@@ -156,11 +174,15 @@ export class AccountController {
       // Update data
       const updateData: any = {};
       if (name !== undefined) updateData.name = name;
-      if (account_type_id !== undefined) updateData.account_type_id = account_type_id;
+      if (account_type_id !== undefined)
+        updateData.account_type_id = account_type_id;
       if (balance !== undefined) updateData.balance = balance;
       if (currency_id !== undefined) updateData.currency_id = currency_id;
 
-      const updatedAccount = await AccountService.updateAccount(accountId, updateData);
+      const updatedAccount = await AccountService.updateAccount(
+        accountId,
+        updateData
+      );
 
       res.status(200).json({
         message: "Account updated successfully",
@@ -172,14 +194,18 @@ export class AccountController {
         res.status(error.statusCode).json({
           message: error.message,
           status: error.statusCode,
-          code: error.code,
+          data: {
+            error: error.message,
+          },
         });
       } else {
         console.error("Unexpected error in updateAccount:", error);
         res.status(500).json({
           message: "Internal server error",
           status: 500,
-          code: "INTERNAL_SERVER_ERROR",
+          data: {
+            error: "Internal server error",
+          },
         });
       }
     }
@@ -198,7 +224,9 @@ export class AccountController {
         res.status(400).json({
           message: "Invalid account ID",
           status: 400,
-          code: "VALIDATION_ERROR",
+          data: {
+            error: "Invalid account ID",
+          },
         });
         return;
       }
@@ -208,20 +236,25 @@ export class AccountController {
       res.status(200).json({
         message: "Account deleted successfully",
         status: 200,
+        data: null,
       });
     } catch (error: unknown) {
       if (error instanceof CustomError) {
         res.status(error.statusCode).json({
           message: error.message,
           status: error.statusCode,
-          code: error.code,
+          data: {
+            error: error.message,
+          },
         });
       } else {
         console.error("Unexpected error in deleteAccount:", error);
         res.status(500).json({
           message: "Internal server error",
           status: 500,
-          code: "INTERNAL_SERVER_ERROR",
+          data: {
+            error: "Internal server error",
+          },
         });
       }
     }
@@ -250,7 +283,9 @@ export class AccountController {
       res.status(500).json({
         message: "Internal server error",
         status: 500,
-        code: "INTERNAL_SERVER_ERROR",
+        data: {
+          error: "Internal server error",
+        },
       });
     }
   }
@@ -269,7 +304,9 @@ export class AccountController {
         res.status(400).json({
           message: "Invalid account ID",
           status: 400,
-          code: "VALIDATION_ERROR",
+          data: {
+            error: "Invalid account ID",
+          },
         });
         return;
       }
@@ -278,12 +315,17 @@ export class AccountController {
         res.status(400).json({
           message: "Amount is required and must be a positive number",
           status: 400,
-          code: "VALIDATION_ERROR",
+          data: {
+            error: "Amount is required and must be a positive number",
+          },
         });
         return;
       }
 
-      const updatedAccount = await AccountService.depositToAccount(accountId, amount);
+      const updatedAccount = await AccountService.depositToAccount(
+        accountId,
+        amount
+      );
 
       res.status(200).json({
         message: "Deposit completed successfully",
@@ -295,14 +337,18 @@ export class AccountController {
         res.status(error.statusCode).json({
           message: error.message,
           status: error.statusCode,
-          code: error.code,
+          data: {
+            error: error.message,
+          },
         });
       } else {
         console.error("Unexpected error in depositToAccount:", error);
         res.status(500).json({
           message: "Internal server error",
           status: 500,
-          code: "INTERNAL_SERVER_ERROR",
+          data: {
+            error: "Internal server error",
+          },
         });
       }
     }
@@ -336,7 +382,10 @@ export class AccountController {
         return;
       }
 
-      const updatedAccount = await AccountService.withdrawFromAccount(accountId, amount);
+      const updatedAccount = await AccountService.withdrawFromAccount(
+        accountId,
+        amount
+      );
 
       res.status(200).json({
         message: "Withdrawal completed successfully",
@@ -435,7 +484,10 @@ export class AccountController {
         return;
       }
 
-      const accounts = await AccountService.getAccountsWithLowBalance(userId, thresholdAmount);
+      const accounts = await AccountService.getAccountsWithLowBalance(
+        userId,
+        thresholdAmount
+      );
 
       res.status(200).json({
         message: "Accounts with low balance retrieved successfully",
@@ -451,6 +503,49 @@ export class AccountController {
         });
       } else {
         console.error("Unexpected error in getAccountsWithLowBalance:", error);
+        res.status(500).json({
+          message: "Internal server error",
+          status: 500,
+          code: "INTERNAL_SERVER_ERROR",
+        });
+      }
+    }
+  }
+
+  // Get accounts for specific user by ID (admin)
+  public static async getAccountsByUserId(
+    req: AuthenticatedRequest,
+    res: Response
+  ): Promise<void> {
+    try {
+      const { userId } = req.params;
+      const parsedUserId = parseInt(userId, 10);
+
+      if (isNaN(parsedUserId)) {
+        res.status(400).json({
+          message: "Invalid user ID",
+          status: 400,
+          code: "VALIDATION_ERROR",
+        });
+        return;
+      }
+
+      const accounts = await AccountService.getAccountsByUserId(parsedUserId);
+
+      res.status(200).json({
+        message: "User accounts retrieved successfully",
+        status: 200,
+        data: accounts,
+      });
+    } catch (error: unknown) {
+      if (error instanceof CustomError) {
+        res.status(error.statusCode).json({
+          message: error.message,
+          status: error.statusCode,
+          code: error.code,
+        });
+      } else {
+        console.error("Unexpected error in getAccountsByUserId:", error);
         res.status(500).json({
           message: "Internal server error",
           status: 500,

@@ -84,4 +84,10 @@ export class UserModel extends Model {
     allowNull: false,
   })
   provider_id!: number;
+
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: true,
+  })
+  plan_id!: number;
 }

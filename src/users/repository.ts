@@ -1,5 +1,5 @@
 import { UserModel } from "./model";
-import { CreateUserData } from "./types";
+import { CreateUserData, UpdateUserData } from "./types";
 
 export class UserRepository {
   public async getUserByEmail(email: string): Promise<UserModel | null> {
@@ -17,6 +17,7 @@ export class UserRepository {
       profile_picture: userData.profile_picture,
       role_id: userData.role_id,
       provider_id: userData.provider_id,
+      plan_id: userData.plan_id,
       join_date: userData.join_date || new Date(),
     };
     return await UserModel.create(userDataWithDate);
@@ -28,6 +29,15 @@ export class UserRepository {
 
   public async updateUserPassword(id: number, password: string): Promise<void> {
     await UserModel.update({ password }, { where: { id } });
+  }
+
+  public async updateUser(
+    id: number,
+    userData: UpdateUserData
+  ): Promise<[number]> {
+    return await UserModel.update(userData, {
+      where: { id },
+    });
   }
 }
 

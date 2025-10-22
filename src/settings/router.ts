@@ -17,16 +17,25 @@ settingRouter.get("/", SettingController.getUserSettings);
 settingRouter.put("/", SettingController.updateUserSettings);
 
 // POST /api/settings/toggle-notifications - Toggle notifications
-settingRouter.post("/toggle-notifications", SettingController.toggleNotifications);
+settingRouter.post(
+  "/toggle-notifications",
+  SettingController.toggleNotifications
+);
 
 // PATCH /api/settings/notifications - Update notification preference
-settingRouter.patch("/notifications", SettingController.updateNotificationPreference);
+settingRouter.patch(
+  "/notifications",
+  SettingController.updateNotificationPreference
+);
 
 // PATCH /api/settings/timezone - Update timezone
 settingRouter.patch("/timezone", SettingController.updateTimezone);
 
 // PATCH /api/settings/language - Update language preference
 settingRouter.patch("/language", SettingController.updateLanguagePreference);
+
+// GET /api/settings/user/:userId - Get setting by user ID (admin)
+settingRouter.get("/user/:userId", SettingController.getSettingByUserId);
 
 // GET /api/settings/:id - Get setting by ID (admin)
 settingRouter.get("/:id", SettingController.getSettingById);

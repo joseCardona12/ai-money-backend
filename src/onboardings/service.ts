@@ -95,6 +95,12 @@ export class OnboardingService {
     return await OnboardingRepository.isOnboardingCompleted(userId);
   }
 
+  // Check if user has onboarding record (regardless of completion status)
+  public async hasUserOnboarding(userId: number): Promise<boolean> {
+    const onboarding = await OnboardingRepository.getOnboardingByUserId(userId);
+    return !!onboarding;
+  }
+
   // Get onboarding by ID
   public async getOnboardingById(id: number): Promise<OnboardingModel> {
     const onboarding = await OnboardingRepository.getOnboardingById(id);

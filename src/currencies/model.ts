@@ -25,4 +25,10 @@ export class CurrencyModel extends Model {
     allowNull: false,
   })
   name!: string;
+
+  @Column({
+    type: DataType.STRING(250),
+    allowNull: false,
+  })
+  symbol!: string;
 }

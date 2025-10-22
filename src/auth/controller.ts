@@ -36,14 +36,18 @@ export class AuthController {
         res.status(error.statusCode).json({
           message: error.message,
           status: error.statusCode,
-          code: error.code,
+          data: {
+            error: error.message,
+          },
         });
       } else {
         console.error("Unexpected error in login:", error);
         res.status(500).json({
           message: "Internal server error",
           status: 500,
-          code: "INTERNAL_SERVER_ERROR",
+          data: {
+            error: "Internal server error",
+          },
         });
       }
     }
@@ -61,6 +65,7 @@ export class AuthController {
         profile_picture,
         role_id,
         provider_id,
+        plan_id,
       } = req.body;
       AuthValidators.validateRegisterParams(
         fullName,
@@ -85,6 +90,7 @@ export class AuthController {
         profile_picture,
         role_id,
         provider_id,
+        plan_id,
       });
 
       // Generar token para el nuevo usuario

@@ -9,7 +9,9 @@ import {
 
 export class AccountService {
   // Create new account
-  public async createAccount(data: CreateAccountData): Promise<AccountModel> {
+  public async createAccount(
+    data: CreateAccountData
+  ): Promise<AccountResponse> {
     // Validate required fields
     if (!data.name || data.name.trim().length === 0) {
       throw new ValidationError("Account name is required");
@@ -26,13 +28,13 @@ export class AccountService {
 
     // Create account
     const newAccount = await AccountRepository.createAccount(data);
-    return newAccount;
+    return this.transformToAccountResponse(newAccount);
   }
 
   // Get account by ID
   public async getAccountById(id: number): Promise<AccountResponse> {
     const account = await AccountRepository.getAccountById(id);
-    
+
     if (!account) {
       throw new NotFoundError("Account not found");
     }
@@ -43,11 +45,14 @@ export class AccountService {
   // Get accounts by user ID
   public async getAccountsByUserId(userId: number): Promise<AccountResponse[]> {
     const accounts = await AccountRepository.getAccountsByUserId(userId);
-    return accounts.map(account => this.transformToAccountResponse(account));
+    return accounts.map((account) => this.transformToAccountResponse(account));
   }
 
   // Update account
-  public async updateAccount(id: number, data: UpdateAccountData): Promise<AccountModel> {
+  public async updateAccount(
+    id: number,
+    data: UpdateAccountData
+  ): Promise<AccountResponse> {
     // Check if account exists
     const existingAccount = await AccountRepository.getAccountById(id);
     if (!existingAccount) {
@@ -69,10 +74,10 @@ export class AccountService {
 
     // Update account
     await AccountRepository.updateAccount(id, data);
-    
+
     // Return updated account
     const updatedAccount = await AccountRepository.getAccountById(id);
-    return updatedAccount!;
+    return this.transformToAccountResponse(updatedAccount!);
   }
 
   // Delete account
@@ -86,7 +91,10 @@ export class AccountService {
   }
 
   // Update account balance
-  public async updateAccountBalance(id: number, balance: number): Promise<AccountModel> {
+  public async updateAccountBalance(
+    id: number,
+    balance: number
+  ): Promise<AccountResponse> {
     const existingAccount = await AccountRepository.getAccountById(id);
     if (!existingAccount) {
       throw new NotFoundError("Account not found");
@@ -97,9 +105,9 @@ export class AccountService {
     }
 
     await AccountRepository.updateAccountBalance(id, balance);
-    
+
     const updatedAccount = await AccountRepository.getAccountById(id);
-    return updatedAccount!;
+    return this.transformToAccountResponse(updatedAccount!);
   }
 
   // Get total balance for user
@@ -116,24 +124,34 @@ export class AccountService {
       throw new ValidationError("Threshold cannot be negative");
     }
 
-    const accounts = await AccountRepository.getAccountsWithLowBalance(userId, threshold);
-    return accounts.map(account => this.transformToAccountResponse(account));
+    const accounts = await AccountRepository.getAccountsWithLowBalance(
+      userId,
+      threshold
+    );
+    return accounts.map((account) => this.transformToAccountResponse(account));
   }
 
   // Get accounts by type
-  public async getAccountsByType(accountTypeId: number): Promise<AccountResponse[]> {
+  public async getAccountsByType(
+    accountTypeId: number
+  ): Promise<AccountResponse[]> {
     const accounts = await AccountRepository.getAccountsByType(accountTypeId);
-    return accounts.map(account => this.transformToAccountResponse(account));
+    return accounts.map((account) => this.transformToAccountResponse(account));
   }
 
   // Get accounts by currency
-  public async getAccountsByCurrency(currencyId: number): Promise<AccountResponse[]> {
+  public async getAccountsByCurrency(
+    currencyId: number
+  ): Promise<AccountResponse[]> {
     const accounts = await AccountRepository.getAccountsByCurrency(currencyId);
-    return accounts.map(account => this.transformToAccountResponse(account));
+    return accounts.map((account) => this.transformToAccountResponse(account));
   }
 
   // Add money to account (deposit)
-  public async depositToAccount(id: number, amount: number): Promise<AccountModel> {
+  public async depositToAccount(
+    id: number,
+    amount: number
+  ): Promise<AccountResponse> {
     if (amount <= 0) {
       throw new ValidationError("Deposit amount must be greater than 0");
     }
@@ -145,13 +163,16 @@ export class AccountService {
 
     const newBalance = Number(existingAccount.balance) + amount;
     await AccountRepository.updateAccountBalance(id, newBalance);
-    
+
     const updatedAccount = await AccountRepository.getAccountById(id);
-    return updatedAccount!;
+    return this.transformToAccountResponse(updatedAccount!);
   }
 
   // Remove money from account (withdrawal)
-  public async withdrawFromAccount(id: number, amount: number): Promise<AccountModel> {
+  public async withdrawFromAccount(
+    id: number,
+    amount: number
+  ): Promise<AccountResponse> {
     if (amount <= 0) {
       throw new ValidationError("Withdrawal amount must be greater than 0");
     }
@@ -167,9 +188,9 @@ export class AccountService {
     }
 
     await AccountRepository.updateAccountBalance(id, newBalance);
-    
+
     const updatedAccount = await AccountRepository.getAccountById(id);
-    return updatedAccount!;
+    return this.transformToAccountResponse(updatedAccount!);
   }
 
   // Transfer money between accounts
@@ -177,7 +198,7 @@ export class AccountService {
     fromAccountId: number,
     toAccountId: number,
     amount: number
-  ): Promise<{ fromAccount: AccountModel; toAccount: AccountModel }> {
+  ): Promise<{ fromAccount: AccountResponse; toAccount: AccountResponse }> {
     if (amount <= 0) {
       throw new ValidationError("Transfer amount must be greater than 0");
     }
@@ -209,12 +230,16 @@ export class AccountService {
     await AccountRepository.updateAccountBalance(toAccountId, toBalance);
 
     // Return updated accounts
-    const updatedFromAccount = await AccountRepository.getAccountById(fromAccountId);
-    const updatedToAccount = await AccountRepository.getAccountById(toAccountId);
+    const updatedFromAccount = await AccountRepository.getAccountById(
+      fromAccountId
+    );
+    const updatedToAccount = await AccountRepository.getAccountById(
+      toAccountId
+    );
 
     return {
-      fromAccount: updatedFromAccount!,
-      toAccount: updatedToAccount!,
+      fromAccount: this.transformToAccountResponse(updatedFromAccount!),
+      toAccount: this.transformToAccountResponse(updatedToAccount!),
     };
   }
 
@@ -228,14 +253,18 @@ export class AccountService {
       created_at: account.created_at,
       currency_id: account.currency_id,
       user_id: account.user_id,
-      accountType: account.accountType ? {
-        id: account.accountType.id,
-        name: account.accountType.name,
-      } : undefined,
-      currency: account.currency ? {
-        id: account.currency.id,
-        name: account.currency.name,
-      } : undefined,
+      accountType: account.accountType
+        ? {
+            id: account.accountType.id,
+            name: account.accountType.name,
+          }
+        : undefined,
+      currency: account.currency
+        ? {
+            id: account.currency.id,
+            name: account.currency.name,
+          }
+        : undefined,
     };
   }
 }

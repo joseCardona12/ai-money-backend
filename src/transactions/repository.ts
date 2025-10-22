@@ -296,6 +296,51 @@ export class TransactionRepository {
       where: whereClause,
     });
   }
+
+  // Search transactions by name/description
+  public async searchTransactionsByName(
+    userId: number,
+    searchTerm: string,
+    limit?: number,
+    offset?: number
+  ): Promise<TransactionModel[]> {
+    return await TransactionModel.findAll({
+      where: {
+        user_id: userId,
+        description: {
+          [Op.like]: `%${searchTerm}%`,
+        },
+      },
+      include: [
+        { model: UserModel, as: "user" },
+        { model: AccountModel, as: "account" },
+        { model: TransactionTypeModel, as: "transactionType" },
+        { model: StateModel, as: "state" },
+        { model: CategoryModel, as: "category" },
+      ],
+      order: [
+        ["date", "DESC"],
+        ["created_at", "DESC"],
+      ],
+      limit,
+      offset,
+    });
+  }
+
+  // Count transactions by search term
+  public async countTransactionsBySearchTerm(
+    userId: number,
+    searchTerm: string
+  ): Promise<number> {
+    return await TransactionModel.count({
+      where: {
+        user_id: userId,
+        description: {
+          [Op.like]: `%${searchTerm}%`,
+        },
+      },
+    });
+  }
 }
 
 export const transactionRepository = new TransactionRepository();

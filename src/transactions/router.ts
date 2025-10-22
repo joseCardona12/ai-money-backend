@@ -23,13 +23,34 @@ transactionRouter.get("/pending", TransactionController.getPendingTransactions);
 transactionRouter.get("/summary", TransactionController.getTransactionSummary);
 
 // GET /api/transactions/monthly-summary - Get monthly transaction summary
-transactionRouter.get("/monthly-summary", TransactionController.getMonthlyTransactionSummary);
+transactionRouter.get(
+  "/monthly-summary",
+  TransactionController.getMonthlyTransactionSummary
+);
+
+// GET /api/transactions/search - Search transactions by name/description
+transactionRouter.get(
+  "/search",
+  TransactionController.searchTransactionsByName
+);
+
+// GET /api/transactions/user/:userId - Get transactions for specific user by ID (admin)
+transactionRouter.get(
+  "/user/:userId",
+  TransactionController.getTransactionsByUserId
+);
 
 // GET /api/transactions/account/:accountId - Get transactions by account
-transactionRouter.get("/account/:accountId", TransactionController.getTransactionsByAccount);
+transactionRouter.get(
+  "/account/:accountId",
+  TransactionController.getTransactionsByAccount
+);
 
 // GET /api/transactions/category/:categoryId - Get transactions by category
-transactionRouter.get("/category/:categoryId", TransactionController.getTransactionsByCategory);
+transactionRouter.get(
+  "/category/:categoryId",
+  TransactionController.getTransactionsByCategory
+);
 
 // GET /api/transactions/:id - Get transaction by ID
 transactionRouter.get("/:id", TransactionController.getTransactionById);

@@ -22,6 +22,9 @@ accountRouter.get("/low-balance", AccountController.getAccountsWithLowBalance);
 // POST /api/accounts/transfer - Transfer between accounts
 accountRouter.post("/transfer", AccountController.transferBetweenAccounts);
 
+// GET /api/accounts/user/:userId - Get accounts for specific user by ID (admin)
+accountRouter.get("/user/:userId", AccountController.getAccountsByUserId);
+
 // GET /api/accounts/:id - Get account by ID
 accountRouter.get("/:id", AccountController.getAccountById);
 

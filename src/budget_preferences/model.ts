@@ -25,4 +25,10 @@ export class BudgetPreferenceModel extends Model {
     allowNull: false,
   })
   name!: string;
+
+  @Column({
+    type: DataType.STRING(200),
+    allowNull: false,
+  })
+  description!: string;
 }
