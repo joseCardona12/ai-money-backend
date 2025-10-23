@@ -1,4 +1,4 @@
-import { TransactionModel } from "./model";
+﻿import { TransactionModel } from "./model";
 import { transactionRepository as TransactionRepository } from "./repository";
 import { accountRepository as AccountRepository } from "../accounts/repository";
 import {
@@ -8,6 +8,7 @@ import {
   TransactionFilters,
   TransactionSummary,
   MonthlyTransactionSummary,
+  MonthlyStatsComparison,
 } from "./types";
 import {
   ValidationError,
@@ -454,6 +455,118 @@ export class TransactionService {
       total,
       page,
       totalPages,
+    };
+  }
+  // Get monthly statistics with comparison to previous month
+  public async getMonthlyStatsComparison(
+    userId: number
+  ): Promise<MonthlyStatsComparison> {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth();
+
+    // Current month date range
+    const currentMonthStart = new Date(currentYear, currentMonth, 1);
+    const currentMonthEnd = new Date(
+      currentYear,
+      currentMonth + 1,
+      0,
+      23,
+      59,
+      59
+    );
+
+    // Last month date range
+    const lastMonthStart = new Date(currentYear, currentMonth - 1, 1);
+    const lastMonthEnd = new Date(currentYear, currentMonth, 0, 23, 59, 59);
+
+    // Get current month transactions
+    const currentMonthTransactions =
+      await TransactionRepository.getTransactionsByUserId(userId, {
+        startDate: currentMonthStart,
+        endDate: currentMonthEnd,
+      });
+
+    // Get last month transactions
+    const lastMonthTransactions =
+      await TransactionRepository.getTransactionsByUserId(userId, {
+        startDate: lastMonthStart,
+        endDate: lastMonthEnd,
+      });
+
+    // Calculate current month stats
+    let currentTotalIncome = 0;
+    let currentTotalExpenses = 0;
+
+    currentMonthTransactions.forEach((transaction) => {
+      if (transaction.transaction_type_id === 1) {
+        currentTotalIncome += Number(transaction.amount);
+      } else if (transaction.transaction_type_id === 2) {
+        currentTotalExpenses += Number(transaction.amount);
+      }
+    });
+
+    const currentTotalAmount = currentTotalIncome + currentTotalExpenses;
+    const currentBalance = currentTotalIncome - currentTotalExpenses;
+
+    // Calculate last month stats
+    let lastTotalIncome = 0;
+    let lastTotalExpenses = 0;
+    let hasLastMonthData = lastMonthTransactions.length > 0;
+
+    lastMonthTransactions.forEach((transaction) => {
+      if (transaction.transaction_type_id === 1) {
+        lastTotalIncome += Number(transaction.amount);
+      } else if (transaction.transaction_type_id === 2) {
+        lastTotalExpenses += Number(transaction.amount);
+      }
+    });
+
+    const lastTotalAmount = lastTotalIncome + lastTotalExpenses;
+    const lastBalance = lastTotalIncome - lastTotalExpenses;
+
+    // Calculate percentage changes
+    const calculatePercentageChange = (
+      current: number,
+      previous: number
+    ): string => {
+      if (previous === 0) return current > 0 ? "+100%" : "0%";
+      const change = ((current - previous) / previous) * 100;
+      const sign = change >= 0 ? "+" : "";
+      return sign;
+    };
+
+    const changes = {
+      totalAmountChange: hasLastMonthData
+        ? calculatePercentageChange(currentTotalAmount, lastTotalAmount)
+        : null,
+      totalIncomeChange: hasLastMonthData
+        ? calculatePercentageChange(currentTotalIncome, lastTotalIncome)
+        : null,
+      totalExpensesChange: hasLastMonthData
+        ? calculatePercentageChange(currentTotalExpenses, lastTotalExpenses)
+        : null,
+      totalAmountChangePositive: currentTotalAmount >= lastTotalAmount,
+      totalIncomeChangePositive: currentTotalIncome >= lastTotalIncome,
+      totalExpensesChangePositive: currentTotalExpenses <= lastTotalExpenses,
+    };
+
+    return {
+      currentMonth: {
+        totalAmount: currentTotalAmount,
+        totalIncome: currentTotalIncome,
+        totalExpenses: currentTotalExpenses,
+        balance: currentBalance,
+      },
+      lastMonth: hasLastMonthData
+        ? {
+            totalAmount: lastTotalAmount,
+            totalIncome: lastTotalIncome,
+            totalExpenses: lastTotalExpenses,
+            balance: lastBalance,
+          }
+        : null,
+      changes,
     };
   }
 }

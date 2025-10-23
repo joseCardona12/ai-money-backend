@@ -7,9 +7,7 @@ export interface CreateTransactionData {
   user_id?: number; // Optional, will be set from JWT token
   account_id: number;
   category_id: number;
-}
-
-export interface UpdateTransactionData {
+}export interface UpdateTransactionData {
   description?: string;
   amount?: number;
   date?: Date;
@@ -17,9 +15,7 @@ export interface UpdateTransactionData {
   state_id?: number;
   account_id?: number;
   category_id?: number;
-}
-
-export interface TransactionResponse {
+}export interface TransactionResponse {
   id: number;
   description: string;
   amount: number;
@@ -75,4 +71,27 @@ export interface MonthlyTransactionSummary {
   totalExpenses: number;
   netAmount: number;
   transactionCount: number;
+}
+
+export interface MonthlyStatsComparison {
+  currentMonth: {
+    totalAmount: number;
+    totalIncome: number;
+    totalExpenses: number;
+    balance: number;
+  };
+  lastMonth: {
+    totalAmount: number;
+    totalIncome: number;
+    totalExpenses: number;
+    balance: number;
+  } | null;
+  changes: {
+    totalAmountChange: string | null;
+    totalIncomeChange: string | null;
+    totalExpensesChange: string | null;
+    totalAmountChangePositive: boolean;
+    totalIncomeChangePositive: boolean;
+    totalExpensesChangePositive: boolean;
+  };
 }

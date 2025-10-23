@@ -1,4 +1,4 @@
-import { Response } from "express";
+﻿import { Response } from "express";
 import { transactionService as TransactionService } from "./service";
 import { AuthenticatedRequest } from "../middleware/authMiddleware";
 import { CustomError } from "../util/errors/customErrors";
@@ -20,7 +20,17 @@ export class TransactionController {
         account_id,
         category_id,
       } = req.body;
-      const userId = req.user!.id; // User ID from JWT token
+      const userId = parseInt(req.params.userId, 10);
+
+      // Verify that the authenticated user is requesting their own data
+      if (req.user!.id !== userId) {
+        res.status(403).json({
+          message: "Forbidden: You can only access your own statistics",
+          status: 403,
+          code: "FORBIDDEN",
+        });
+        return;
+      }
 
       // Validate required fields
       if (!description || typeof description !== "string") {
@@ -130,7 +140,17 @@ export class TransactionController {
     res: Response
   ): Promise<void> {
     try {
-      const userId = req.user!.id; // User ID from JWT token
+      const userId = parseInt(req.params.userId, 10);
+
+      // Verify that the authenticated user is requesting their own data
+      if (req.user!.id !== userId) {
+        res.status(403).json({
+          message: "Forbidden: You can only access your own statistics",
+          status: 403,
+          code: "FORBIDDEN",
+        });
+        return;
+      }
       const {
         page = 1,
         limit = 20,
@@ -449,7 +469,17 @@ export class TransactionController {
     res: Response
   ): Promise<void> {
     try {
-      const userId = req.user!.id; // User ID from JWT token
+      const userId = parseInt(req.params.userId, 10);
+
+      // Verify that the authenticated user is requesting their own data
+      if (req.user!.id !== userId) {
+        res.status(403).json({
+          message: "Forbidden: You can only access your own statistics",
+          status: 403,
+          code: "FORBIDDEN",
+        });
+        return;
+      }
       const { limit = 10 } = req.query;
 
       const transactions = await TransactionService.getRecentTransactions(
@@ -486,7 +516,17 @@ export class TransactionController {
     res: Response
   ): Promise<void> {
     try {
-      const userId = req.user!.id; // User ID from JWT token
+      const userId = parseInt(req.params.userId, 10);
+
+      // Verify that the authenticated user is requesting their own data
+      if (req.user!.id !== userId) {
+        res.status(403).json({
+          message: "Forbidden: You can only access your own statistics",
+          status: 403,
+          code: "FORBIDDEN",
+        });
+        return;
+      }
 
       const transactions = await TransactionService.getPendingTransactions(
         userId
@@ -521,7 +561,17 @@ export class TransactionController {
     res: Response
   ): Promise<void> {
     try {
-      const userId = req.user!.id; // User ID from JWT token
+      const userId = parseInt(req.params.userId, 10);
+
+      // Verify that the authenticated user is requesting their own data
+      if (req.user!.id !== userId) {
+        res.status(403).json({
+          message: "Forbidden: You can only access your own statistics",
+          status: 403,
+          code: "FORBIDDEN",
+        });
+        return;
+      }
       const { startDate, endDate } = req.query;
 
       const summary = await TransactionService.getTransactionSummary(
@@ -559,7 +609,17 @@ export class TransactionController {
     res: Response
   ): Promise<void> {
     try {
-      const userId = req.user!.id; // User ID from JWT token
+      const userId = parseInt(req.params.userId, 10);
+
+      // Verify that the authenticated user is requesting their own data
+      if (req.user!.id !== userId) {
+        res.status(403).json({
+          message: "Forbidden: You can only access your own statistics",
+          status: 403,
+          code: "FORBIDDEN",
+        });
+        return;
+      }
       const { year } = req.query;
 
       if (!year) {
@@ -608,7 +668,17 @@ export class TransactionController {
     res: Response
   ): Promise<void> {
     try {
-      const userId = req.user!.id; // User ID from JWT token
+      const userId = parseInt(req.params.userId, 10);
+
+      // Verify that the authenticated user is requesting their own data
+      if (req.user!.id !== userId) {
+        res.status(403).json({
+          message: "Forbidden: You can only access your own statistics",
+          status: 403,
+          code: "FORBIDDEN",
+        });
+        return;
+      }
       const { accountId } = req.params;
       const { page = 1, limit = 20 } = req.query;
 
@@ -658,7 +728,17 @@ export class TransactionController {
     res: Response
   ): Promise<void> {
     try {
-      const userId = req.user!.id; // User ID from JWT token
+      const userId = parseInt(req.params.userId, 10);
+
+      // Verify that the authenticated user is requesting their own data
+      if (req.user!.id !== userId) {
+        res.status(403).json({
+          message: "Forbidden: You can only access your own statistics",
+          status: 403,
+          code: "FORBIDDEN",
+        });
+        return;
+      }
       const { categoryId } = req.params;
       const { page = 1, limit = 20 } = req.query;
 
@@ -708,7 +788,17 @@ export class TransactionController {
     res: Response
   ): Promise<void> {
     try {
-      const userId = req.user!.id; // User ID from JWT token
+      const userId = parseInt(req.params.userId, 10);
+
+      // Verify that the authenticated user is requesting their own data
+      if (req.user!.id !== userId) {
+        res.status(403).json({
+          message: "Forbidden: You can only access your own statistics",
+          status: 403,
+          code: "FORBIDDEN",
+        });
+        return;
+      }
       const { search } = req.query;
       const { page = 1, limit = 20 } = req.query;
 
@@ -742,6 +832,49 @@ export class TransactionController {
         });
       } else {
         console.error("Unexpected error in searchTransactionsByName:", error);
+        res.status(500).json({
+          message: "Internal server error",
+          status: 500,
+          code: "INTERNAL_SERVER_ERROR",
+        });
+      }
+    }
+  }
+
+  // Get monthly statistics comparison
+  public static async getMonthlyStatsComparison(
+    req: AuthenticatedRequest,
+    res: Response
+  ): Promise<void> {
+    try {
+      const userId = parseInt(req.params.userId, 10);
+
+      // Verify that the authenticated user is requesting their own data
+      if (req.user!.id !== userId) {
+        res.status(403).json({
+          message: "Forbidden: You can only access your own statistics",
+          status: 403,
+          code: "FORBIDDEN",
+        });
+        return;
+      }
+
+      const stats = await TransactionService.getMonthlyStatsComparison(userId);
+
+      res.status(200).json({
+        message: "Monthly statistics retrieved successfully",
+        status: 200,
+        data: stats,
+      });
+    } catch (error: unknown) {
+      if (error instanceof CustomError) {
+        res.status(error.statusCode).json({
+          message: error.message,
+          status: error.statusCode,
+          code: error.code,
+        });
+      } else {
+        console.error("Unexpected error in getMonthlyStatsComparison:", error);
         res.status(500).json({
           message: "Internal server error",
           status: 500,

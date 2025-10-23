@@ -1,4 +1,4 @@
-import { Router } from "express";
+﻿import { Router } from "express";
 import { TransactionController } from "./controller";
 import { authMiddleware } from "../middleware/authMiddleware";
 
@@ -32,6 +32,13 @@ transactionRouter.get(
 transactionRouter.get(
   "/search",
   TransactionController.searchTransactionsByName
+);
+
+// GET /api/transactions/user/:userId/monthly-stats - Get monthly statistics with comparison for specific user
+// IMPORTANT: This route must come BEFORE /user/:userId to avoid route conflicts
+transactionRouter.get(
+  "/user/:userId/monthly-stats",
+  TransactionController.getMonthlyStatsComparison
 );
 
 // GET /api/transactions/user/:userId - Get transactions for specific user by ID (admin)
