@@ -25,7 +25,8 @@ export class BudgetRepository {
     const whereClause: any = { user_id: userId };
 
     if (month) {
-      const startOfMonth = new Date(month.getFullYear(), month.getMonth(), 1);
+        console.log("Filtering by month:", month);
+        const startOfMonth = new Date(month.getFullYear(), month.getMonth(), 1);
       const endOfMonth = new Date(month.getFullYear(), month.getMonth() + 1, 0);
       whereClause.month = {
         [Op.between]: [startOfMonth, endOfMonth],
@@ -162,7 +163,8 @@ export class BudgetRepository {
     const whereClause: any = { user_id: userId };
 
     if (month) {
-      const startOfMonth = new Date(month.getFullYear(), month.getMonth(), 1);
+        console.log("Filtering by month:", month);
+        const startOfMonth = new Date(month.getFullYear(), month.getMonth(), 1);
       const endOfMonth = new Date(month.getFullYear(), month.getMonth() + 1, 0);
       whereClause.month = {
         [Op.between]: [startOfMonth, endOfMonth],
@@ -201,3 +203,4 @@ export class BudgetRepository {
 }
 
 export const budgetRepository = new BudgetRepository();
+

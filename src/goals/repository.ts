@@ -30,8 +30,11 @@ export class GoalRepository {
   public async createGoal(data: CreateGoalData): Promise<GoalModel> {
     const goalData = {
       name: data.name,
+      description: data.description || null,
+      color: data.color || "#3B82F6",
+      icon: data.icon || "🎯",
       target_amount: data.target_amount,
-      current_amount: data.current_amount || 0.00,
+      current_amount: data.current_amount || 0.0,
       start_date: data.start_date,
       end_date: data.end_date,
       state_id: data.state_id,
@@ -44,10 +47,7 @@ export class GoalRepository {
   }
 
   // Update goal
-  public async updateGoal(
-    id: number,
-    data: UpdateGoalData
-  ): Promise<[number]> {
+  public async updateGoal(id: number, data: UpdateGoalData): Promise<[number]> {
     return await GoalModel.update(data, {
       where: { id },
     });
@@ -99,11 +99,11 @@ export class GoalRepository {
   public async getActiveGoalsForUser(userId: number): Promise<GoalModel[]> {
     const currentDate = new Date();
     return await GoalModel.findAll({
-      where: { 
+      where: {
         user_id: userId,
         end_date: {
-          [require('sequelize').Op.gte]: currentDate
-        }
+          [require("sequelize").Op.gte]: currentDate,
+        },
       },
       include: [
         { model: UserModel, as: "user" },
@@ -127,11 +127,13 @@ export class GoalRepository {
   // Get goals near completion (90% or more progress)
   public async getGoalsNearCompletion(userId: number): Promise<GoalModel[]> {
     return await GoalModel.findAll({
-      where: { 
+      where: {
         user_id: userId,
         current_amount: {
-          [require('sequelize').Op.gte]: require('sequelize').literal('target_amount * 0.9')
-        }
+          [require("sequelize").Op.gte]: require("sequelize").literal(
+            "target_amount * 0.9"
+          ),
+        },
       },
       include: [
         { model: UserModel, as: "user" },

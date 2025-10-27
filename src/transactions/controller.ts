@@ -20,17 +20,7 @@ export class TransactionController {
         account_id,
         category_id,
       } = req.body;
-      const userId = parseInt(req.params.userId, 10);
-
-      // Verify that the authenticated user is requesting their own data
-      if (req.user!.id !== userId) {
-        res.status(403).json({
-          message: "Forbidden: You can only access your own statistics",
-          status: 403,
-          code: "FORBIDDEN",
-        });
-        return;
-      }
+      const userId = req.user!.id; // Get user ID from authenticated token
 
       // Validate required fields
       if (!description || typeof description !== "string") {
@@ -125,6 +115,136 @@ export class TransactionController {
         });
       } else {
         console.error("Unexpected error in createTransaction:", error);
+        res.status(500).json({
+          message: "Internal server error",
+          status: 500,
+          code: "INTERNAL_SERVER_ERROR",
+        });
+      }
+    }
+  }
+
+  // Create transaction for specific user (admin)
+  public static async createTransactionForUser(
+    req: AuthenticatedRequest,
+    res: Response
+  ): Promise<void> {
+    try {
+      const { userId } = req.params;
+      const parsedUserId = parseInt(userId, 10);
+
+      if (isNaN(parsedUserId)) {
+        res.status(400).json({
+          message: "Invalid user ID",
+          status: 400,
+          code: "VALIDATION_ERROR",
+        });
+        return;
+      }
+
+      const {
+        description,
+        amount,
+        date,
+        transaction_type_id,
+        state_id,
+        account_id,
+        category_id,
+      } = req.body;
+
+      // Validate required fields
+      if (!description || typeof description !== "string") {
+        res.status(400).json({
+          message: "Description is required and must be a string",
+          status: 400,
+          code: "VALIDATION_ERROR",
+        });
+        return;
+      }
+
+      if (!amount || typeof amount !== "number") {
+        res.status(400).json({
+          message: "Amount is required and must be a number",
+          status: 400,
+          code: "VALIDATION_ERROR",
+        });
+        return;
+      }
+
+      if (!date) {
+        res.status(400).json({
+          message: "Date is required",
+          status: 400,
+          code: "VALIDATION_ERROR",
+        });
+        return;
+      }
+
+      if (!transaction_type_id || typeof transaction_type_id !== "number") {
+        res.status(400).json({
+          message: "Transaction type ID is required and must be a number",
+          status: 400,
+          code: "VALIDATION_ERROR",
+        });
+        return;
+      }
+
+      if (!state_id || typeof state_id !== "number") {
+        res.status(400).json({
+          message: "State ID is required and must be a number",
+          status: 400,
+          code: "VALIDATION_ERROR",
+        });
+        return;
+      }
+
+      if (!account_id || typeof account_id !== "number") {
+        res.status(400).json({
+          message: "Account ID is required and must be a number",
+          status: 400,
+          code: "VALIDATION_ERROR",
+        });
+        return;
+      }
+
+      if (!category_id || typeof category_id !== "number") {
+        res.status(400).json({
+          message: "Category ID is required and must be a number",
+          status: 400,
+          code: "VALIDATION_ERROR",
+        });
+        return;
+      }
+
+      const transactionData = {
+        description,
+        amount,
+        date: new Date(date),
+        transaction_type_id,
+        state_id,
+        user_id: parsedUserId,
+        account_id,
+        category_id,
+      };
+
+      const transaction = await TransactionService.createTransaction(
+        transactionData
+      );
+
+      res.status(201).json({
+        message: "Transaction created successfully",
+        status: 201,
+        data: transaction,
+      });
+    } catch (error: unknown) {
+      if (error instanceof CustomError) {
+        res.status(error.statusCode).json({
+          message: error.message,
+          status: error.statusCode,
+          code: error.code,
+        });
+      } else {
+        console.error("Unexpected error in createTransactionForUser:", error);
         res.status(500).json({
           message: "Internal server error",
           status: 500,
@@ -315,8 +435,18 @@ export class TransactionController {
     res: Response
   ): Promise<void> {
     try {
-      const { id } = req.params;
+      const { id, userId } = req.params;
       const transactionId = parseInt(id);
+      const parsedUserId = parseInt(userId, 10);
+
+      if (isNaN(parsedUserId)) {
+        res.status(400).json({
+          message: "Invalid user ID",
+          status: 400,
+          code: "VALIDATION_ERROR",
+        });
+        return;
+      }
 
       if (isNaN(transactionId)) {
         res.status(400).json({
@@ -327,8 +457,19 @@ export class TransactionController {
         return;
       }
 
+      // Verify that the authenticated user is requesting their own data
+      if (req.user!.id !== parsedUserId) {
+        res.status(403).json({
+          message: "Forbidden: You can only access your own transactions",
+          status: 403,
+          code: "FORBIDDEN",
+        });
+        return;
+      }
+
       const transaction = await TransactionService.getTransactionById(
-        transactionId
+        transactionId,
+        parsedUserId
       );
 
       res.status(200).json({
@@ -360,14 +501,34 @@ export class TransactionController {
     res: Response
   ): Promise<void> {
     try {
-      const { id } = req.params;
+      const { id, userId } = req.params;
       const transactionId = parseInt(id);
+      const parsedUserId = parseInt(userId, 10);
+
+      if (isNaN(parsedUserId)) {
+        res.status(400).json({
+          message: "Invalid user ID",
+          status: 400,
+          code: "VALIDATION_ERROR",
+        });
+        return;
+      }
 
       if (isNaN(transactionId)) {
         res.status(400).json({
           message: "Invalid transaction ID",
           status: 400,
           code: "VALIDATION_ERROR",
+        });
+        return;
+      }
+
+      // Verify that the authenticated user is requesting their own data
+      if (req.user!.id !== parsedUserId) {
+        res.status(403).json({
+          message: "Forbidden: You can only update your own transactions",
+          status: 403,
+          code: "FORBIDDEN",
         });
         return;
       }
@@ -395,7 +556,8 @@ export class TransactionController {
 
       const updatedTransaction = await TransactionService.updateTransaction(
         transactionId,
-        updateData
+        updateData,
+        parsedUserId
       );
 
       res.status(200).json({
@@ -427,8 +589,18 @@ export class TransactionController {
     res: Response
   ): Promise<void> {
     try {
-      const { id } = req.params;
+      const { id, userId } = req.params;
       const transactionId = parseInt(id);
+      const parsedUserId = parseInt(userId, 10);
+
+      if (isNaN(parsedUserId)) {
+        res.status(400).json({
+          message: "Invalid user ID",
+          status: 400,
+          code: "VALIDATION_ERROR",
+        });
+        return;
+      }
 
       if (isNaN(transactionId)) {
         res.status(400).json({
@@ -439,11 +611,22 @@ export class TransactionController {
         return;
       }
 
-      await TransactionService.deleteTransaction(transactionId);
+      // Verify that the authenticated user is requesting their own data
+      if (req.user!.id !== parsedUserId) {
+        res.status(403).json({
+          message: "Forbidden: You can only delete your own transactions",
+          status: 403,
+          code: "FORBIDDEN",
+        });
+        return;
+      }
+
+      await TransactionService.deleteTransaction(transactionId, parsedUserId);
 
       res.status(200).json({
         message: "Transaction deleted successfully",
         status: 200,
+        data: null,
       });
     } catch (error: unknown) {
       if (error instanceof CustomError) {

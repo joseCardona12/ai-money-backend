@@ -177,6 +177,7 @@ export class BudgetService {
     userId: number,
     month: Date
   ): Promise<MonthlyBudgetOverview> {
+    console.log("getMonthlyBudgetOverview called with userId:", userId, "month:", month);
     const budgets = await BudgetRepository.getBudgetsByUserId(userId, month);
     const summary = await this.getBudgetSummary(userId, month);
 
@@ -282,3 +283,4 @@ export class BudgetService {
 }
 
 export const budgetService = new BudgetService();
+

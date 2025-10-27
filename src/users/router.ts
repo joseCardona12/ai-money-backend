@@ -18,4 +18,3 @@ userRouter.put("/", UserController.updateUser);
 
 // PUT /api/users/:id - Update user by ID (admin)
 userRouter.put("/:id", UserController.updateUserById);
-

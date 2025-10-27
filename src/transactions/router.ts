@@ -7,63 +7,86 @@ export const transactionRouter: Router = Router();
 // All transaction routes require authentication
 transactionRouter.use(authMiddleware);
 
-// POST /api/transactions - Create new transaction
-transactionRouter.post("/", TransactionController.createTransaction);
-
-// GET /api/transactions - Get user's transactions with filters and pagination
-transactionRouter.get("/", TransactionController.getUserTransactions);
-
-// GET /api/transactions/recent - Get recent transactions
-transactionRouter.get("/recent", TransactionController.getRecentTransactions);
-
-// GET /api/transactions/pending - Get pending transactions
-transactionRouter.get("/pending", TransactionController.getPendingTransactions);
-
-// GET /api/transactions/summary - Get transaction summary
-transactionRouter.get("/summary", TransactionController.getTransactionSummary);
-
-// GET /api/transactions/monthly-summary - Get monthly transaction summary
-transactionRouter.get(
-  "/monthly-summary",
-  TransactionController.getMonthlyTransactionSummary
-);
-
-// GET /api/transactions/search - Search transactions by name/description
-transactionRouter.get(
-  "/search",
-  TransactionController.searchTransactionsByName
-);
+// ===== MOST SPECIFIC ROUTES FIRST (with multiple path segments) =====
 
 // GET /api/transactions/user/:userId/monthly-stats - Get monthly statistics with comparison for specific user
-// IMPORTANT: This route must come BEFORE /user/:userId to avoid route conflicts
 transactionRouter.get(
   "/user/:userId/monthly-stats",
   TransactionController.getMonthlyStatsComparison
 );
 
-// GET /api/transactions/user/:userId - Get transactions for specific user by ID (admin)
+// GET /api/transactions/user/:userId/recent - Get recent transactions for specific user
+transactionRouter.get(
+  "/user/:userId/recent",
+  TransactionController.getRecentTransactions
+);
+
+// GET /api/transactions/user/:userId/pending - Get pending transactions for specific user
+transactionRouter.get(
+  "/user/:userId/pending",
+  TransactionController.getPendingTransactions
+);
+
+// GET /api/transactions/user/:userId/summary - Get transaction summary for specific user
+transactionRouter.get(
+  "/user/:userId/summary",
+  TransactionController.getTransactionSummary
+);
+
+// GET /api/transactions/user/:userId/monthly-summary - Get monthly transaction summary for specific user
+transactionRouter.get(
+  "/user/:userId/monthly-summary",
+  TransactionController.getMonthlyTransactionSummary
+);
+
+// GET /api/transactions/user/:userId/search - Search transactions by name/description for specific user
+transactionRouter.get(
+  "/user/:userId/search",
+  TransactionController.searchTransactionsByName
+);
+
+// GET /api/transactions/user/:userId/account/:accountId - Get transactions by account for specific user
+transactionRouter.get(
+  "/user/:userId/account/:accountId",
+  TransactionController.getTransactionsByAccount
+);
+
+// GET /api/transactions/user/:userId/category/:categoryId - Get transactions by category for specific user
+transactionRouter.get(
+  "/user/:userId/category/:categoryId",
+  TransactionController.getTransactionsByCategory
+);
+
+// ===== TRANSACTION SPECIFIC ROUTES (/:id/user/:userId) =====
+
+// GET /api/transactions/:id/user/:userId - Get transaction by ID for specific user
+transactionRouter.get(
+  "/:id/user/:userId",
+  TransactionController.getTransactionById
+);
+
+// PUT /api/transactions/:id/user/:userId - Update transaction for specific user
+transactionRouter.put(
+  "/:id/user/:userId",
+  TransactionController.updateTransaction
+);
+
+// DELETE /api/transactions/:id/user/:userId - Delete transaction for specific user
+transactionRouter.delete(
+  "/:id/user/:userId",
+  TransactionController.deleteTransaction
+);
+
+// ===== GENERIC ROUTES (/:userId or /user/:userId) =====
+
+// POST /api/transactions/user/:userId - Create transaction for specific user
+transactionRouter.post(
+  "/user/:userId",
+  TransactionController.createTransactionForUser
+);
+
+// GET /api/transactions/user/:userId - Get all transactions for specific user
 transactionRouter.get(
   "/user/:userId",
   TransactionController.getTransactionsByUserId
 );
-
-// GET /api/transactions/account/:accountId - Get transactions by account
-transactionRouter.get(
-  "/account/:accountId",
-  TransactionController.getTransactionsByAccount
-);
-
-// GET /api/transactions/category/:categoryId - Get transactions by category
-transactionRouter.get(
-  "/category/:categoryId",
-  TransactionController.getTransactionsByCategory
-);
-
-// GET /api/transactions/:id - Get transaction by ID
-transactionRouter.get("/:id", TransactionController.getTransactionById);
-
-// PUT /api/transactions/:id - Update transaction
-transactionRouter.put("/:id", TransactionController.updateTransaction);
-
-// DELETE /api/transactions/:id - Delete transaction
-transactionRouter.delete("/:id", TransactionController.deleteTransaction);

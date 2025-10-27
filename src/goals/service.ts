@@ -57,7 +57,7 @@ export class GoalService {
   // Get goal by ID
   public async getGoalById(id: number): Promise<GoalResponse> {
     const goal = await GoalRepository.getGoalById(id);
-    
+
     if (!goal) {
       throw new NotFoundError("Goal not found");
     }
@@ -68,11 +68,14 @@ export class GoalService {
   // Get goals by user ID
   public async getGoalsByUserId(userId: number): Promise<GoalResponse[]> {
     const goals = await GoalRepository.getGoalsByUserId(userId);
-    return goals.map(goal => this.transformToGoalResponse(goal));
+    return goals.map((goal) => this.transformToGoalResponse(goal));
   }
 
   // Update goal
-  public async updateGoal(id: number, data: UpdateGoalData): Promise<GoalModel> {
+  public async updateGoal(
+    id: number,
+    data: UpdateGoalData
+  ): Promise<GoalModel> {
     // Check if goal exists
     const existingGoal = await GoalRepository.getGoalById(id);
     if (!existingGoal) {
@@ -96,7 +99,7 @@ export class GoalService {
     if (data.start_date && data.end_date) {
       const startDate = new Date(data.start_date);
       const endDate = new Date(data.end_date);
-      
+
       if (endDate <= startDate) {
         throw new ValidationError("End date must be after start date");
       }
@@ -104,7 +107,7 @@ export class GoalService {
 
     // Update goal
     await GoalRepository.updateGoal(id, data);
-    
+
     // Return updated goal
     const updatedGoal = await GoalRepository.getGoalById(id);
     return updatedGoal!;
@@ -123,11 +126,14 @@ export class GoalService {
   // Get active goals for user
   public async getActiveGoalsForUser(userId: number): Promise<GoalResponse[]> {
     const goals = await GoalRepository.getActiveGoalsForUser(userId);
-    return goals.map(goal => this.transformToGoalResponse(goal));
+    return goals.map((goal) => this.transformToGoalResponse(goal));
   }
 
   // Update goal progress
-  public async updateGoalProgress(id: number, currentAmount: number): Promise<GoalModel> {
+  public async updateGoalProgress(
+    id: number,
+    currentAmount: number
+  ): Promise<GoalModel> {
     const existingGoal = await GoalRepository.getGoalById(id);
     if (!existingGoal) {
       throw new NotFoundError("Goal not found");
@@ -142,7 +148,7 @@ export class GoalService {
     }
 
     await GoalRepository.updateGoalProgress(id, currentAmount);
-    
+
     const updatedGoal = await GoalRepository.getGoalById(id);
     return updatedGoal!;
   }
@@ -150,14 +156,15 @@ export class GoalService {
   // Get goals near completion
   public async getGoalsNearCompletion(userId: number): Promise<GoalResponse[]> {
     const goals = await GoalRepository.getGoalsNearCompletion(userId);
-    return goals.map(goal => this.transformToGoalResponse(goal));
+    return goals.map((goal) => this.transformToGoalResponse(goal));
   }
 
   // Transform GoalModel to GoalResponse with calculated fields
   private transformToGoalResponse(goal: GoalModel): GoalResponse {
-    const progressPercentage = goal.target_amount > 0 
-      ? Math.round((goal.current_amount / goal.target_amount) * 100)
-      : 0;
+    const progressPercentage =
+      goal.target_amount > 0
+        ? Math.round((goal.current_amount / goal.target_amount) * 100)
+        : 0;
 
     const currentDate = new Date();
     const endDate = new Date(goal.end_date);
@@ -167,6 +174,9 @@ export class GoalService {
     return {
       id: goal.id,
       name: goal.name,
+      description: goal.description,
+      color: goal.color,
+      icon: goal.icon,
       target_amount: goal.target_amount,
       current_amount: goal.current_amount,
       start_date: goal.start_date,

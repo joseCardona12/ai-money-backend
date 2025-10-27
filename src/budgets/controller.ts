@@ -48,12 +48,18 @@ export class BudgetController {
         user_id: userId,
       };
 
-      const budget = await BudgetService.createBudget(budgetData);
+      await BudgetService.createBudget(budgetData);
+
+      // Return all budgets for the month after creating
+      const overview = await BudgetService.getMonthlyBudgetOverview(
+        userId,
+        new Date(month)
+      );
 
       res.status(201).json({
         message: "Budget created successfully",
         status: 201,
-        data: budget,
+        data: overview,
       });
     } catch (error: unknown) {
       if (error instanceof CustomError) {
@@ -186,10 +192,16 @@ export class BudgetController {
 
       const updatedBudget = await BudgetService.updateBudget(budgetId, updateData);
 
+      // Get the month from the updated budget to return all budgets for that month
+      const overview = await BudgetService.getMonthlyBudgetOverview(
+        req.user!.id,
+        updatedBudget.month
+      );
+
       res.status(200).json({
         message: "Budget updated successfully",
         status: 200,
-        data: updatedBudget,
+        data: overview,
       });
     } catch (error: unknown) {
       if (error instanceof CustomError) {
@@ -398,3 +410,6 @@ export class BudgetController {
     }
   }
 }
+
+
+

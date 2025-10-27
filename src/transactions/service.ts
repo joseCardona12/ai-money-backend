@@ -58,10 +58,18 @@ export class TransactionService {
   }
 
   // Get transaction by ID
-  public async getTransactionById(id: number): Promise<TransactionResponse> {
+  public async getTransactionById(
+    id: number,
+    userId?: number
+  ): Promise<TransactionResponse> {
     const transaction = await TransactionRepository.getTransactionById(id);
 
     if (!transaction) {
+      throw new NotFoundError("Transaction not found");
+    }
+
+    // Verify transaction belongs to user if userId is provided
+    if (userId && transaction.user_id !== userId) {
       throw new NotFoundError("Transaction not found");
     }
 
@@ -108,13 +116,19 @@ export class TransactionService {
   // Update transaction
   public async updateTransaction(
     id: number,
-    data: UpdateTransactionData
-  ): Promise<TransactionModel> {
+    data: UpdateTransactionData,
+    userId?: number
+  ): Promise<TransactionResponse> {
     // Check if transaction exists
     const existingTransaction = await TransactionRepository.getTransactionById(
       id
     );
     if (!existingTransaction) {
+      throw new NotFoundError("Transaction not found");
+    }
+
+    // Verify transaction belongs to user if userId is provided
+    if (userId && existingTransaction.user_id !== userId) {
       throw new NotFoundError("Transaction not found");
     }
 
@@ -153,15 +167,20 @@ export class TransactionService {
     const updatedTransaction = await TransactionRepository.getTransactionById(
       id
     );
-    return updatedTransaction!;
+    return this.transformToTransactionResponse(updatedTransaction!);
   }
 
   // Delete transaction
-  public async deleteTransaction(id: number): Promise<void> {
+  public async deleteTransaction(id: number, userId?: number): Promise<void> {
     const existingTransaction = await TransactionRepository.getTransactionById(
       id
     );
     if (!existingTransaction) {
+      throw new NotFoundError("Transaction not found");
+    }
+
+    // Verify transaction belongs to user if userId is provided
+    if (userId && existingTransaction.user_id !== userId) {
       throw new NotFoundError("Transaction not found");
     }
 

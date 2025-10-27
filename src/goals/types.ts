@@ -1,5 +1,8 @@
 export interface CreateGoalData {
   name: string;
+  description?: string;
+  color?: string;
+  icon?: string;
   target_amount: number;
   current_amount?: number;
   start_date: Date;
@@ -11,6 +14,9 @@ export interface CreateGoalData {
 
 export interface UpdateGoalData {
   name?: string;
+  description?: string;
+  color?: string;
+  icon?: string;
   target_amount?: number;
   current_amount?: number;
   start_date?: Date;
@@ -22,6 +28,9 @@ export interface UpdateGoalData {
 export interface GoalResponse {
   id: number;
   name: string;
+  description?: string;
+  color?: string;
+  icon?: string;
   target_amount: number;
   current_amount: number;
   start_date: Date;
