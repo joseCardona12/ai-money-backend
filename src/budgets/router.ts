@@ -17,7 +17,10 @@ budgetRouter.get("/", BudgetController.getUserBudgets);
 budgetRouter.get("/summary", BudgetController.getBudgetSummary);
 
 // GET /api/budgets/monthly-overview - Get monthly budget overview
-budgetRouter.get("/monthly-overview", BudgetController.getMonthlyBudgetOverview);
+budgetRouter.get(
+  "/monthly-overview",
+  BudgetController.getMonthlyBudgetOverview
+);
 
 // GET /api/budgets/alerts - Get budgets with alerts
 budgetRouter.get("/alerts", BudgetController.getBudgetsWithAlerts);

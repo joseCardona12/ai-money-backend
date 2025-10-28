@@ -27,6 +27,19 @@ export class UserRepository {
     return await UserModel.findByPk(id);
   }
 
+  public async getAllUsers(
+    page: number = 1,
+    limit: number = 10
+  ): Promise<{ users: UserModel[]; total: number }> {
+    const offset = (page - 1) * limit;
+    const { count, rows } = await UserModel.findAndCountAll({
+      offset,
+      limit,
+      order: [["id", "DESC"]],
+    });
+    return { users: rows, total: count };
+  }
+
   public async updateUserPassword(id: number, password: string): Promise<void> {
     await UserModel.update({ password }, { where: { id } });
   }
@@ -36,6 +49,12 @@ export class UserRepository {
     userData: UpdateUserData
   ): Promise<[number]> {
     return await UserModel.update(userData, {
+      where: { id },
+    });
+  }
+
+  public async deleteUser(id: number): Promise<number> {
+    return await UserModel.destroy({
       where: { id },
     });
   }

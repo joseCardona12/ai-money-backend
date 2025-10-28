@@ -1,9 +1,75 @@
 import { UserModel } from "./model";
 import { userRepository as UserRepository } from "./repository";
-import { UpdateUserData, UserResponse } from "./types";
+import { CreateUserData, UpdateUserData, UserResponse } from "./types";
 import { NotFoundError, ValidationError, ConflictError } from "../util/errors/customErrors";
 
 export class UserService {
+  // Create a new user
+  public async createUser(data: CreateUserData): Promise<UserResponse> {
+    // Validate required fields
+    if (!data.fullName || data.fullName.trim().length === 0) {
+      throw new ValidationError("Full name is required");
+    }
+
+    if (!data.email || data.email.trim().length === 0) {
+      throw new ValidationError("Email is required");
+    }
+
+    if (!data.password || data.password.length < 8) {
+      throw new ValidationError("Password must be at least 8 characters");
+    }
+
+    if (!data.phone_number || data.phone_number.trim().length === 0) {
+      throw new ValidationError("Phone number is required");
+    }
+
+    if (!data.address || data.address.trim().length === 0) {
+      throw new ValidationError("Address is required");
+    }
+
+    // Check if email already exists
+    const existingUser = await UserRepository.getUserByEmail(data.email.trim());
+    if (existingUser) {
+      throw new ConflictError("Email is already in use");
+    }
+
+    // Create user
+    const newUser = await UserRepository.createUser({
+      fullName: data.fullName.trim(),
+      email: data.email.trim(),
+      password: data.password,
+      phone_number: data.phone_number.trim(),
+      address: data.address.trim(),
+      bio: data.bio?.trim() || "",
+      profile_picture: data.profile_picture || "https://avatar.iran.liara.run/public/8",
+      role_id: data.role_id || 1,
+      provider_id: data.provider_id || 1,
+      plan_id: data.plan_id || 1,
+      join_date: new Date(),
+    });
+
+    return this.transformToUserResponse(newUser);
+  }
+
+  // Get all users with pagination
+  public async getAllUsers(
+    page: number = 1,
+    limit: number = 10
+  ): Promise<{ users: UserResponse[]; total: number }> {
+    if (page < 1) {
+      throw new ValidationError("Page must be greater than 0");
+    }
+    if (limit < 1 || limit > 100) {
+      throw new ValidationError("Limit must be between 1 and 100");
+    }
+
+    const { users, total } = await UserRepository.getAllUsers(page, limit);
+    return {
+      users: users.map((user) => this.transformToUserResponse(user)),
+      total,
+    };
+  }
+
   // Get user by ID
   public async getUserById(id: number): Promise<UserResponse> {
     if (!id || id <= 0) {
@@ -111,6 +177,22 @@ export class UserService {
     return this.transformToUserResponse(updatedUser!);
   }
 
+  // Delete user
+  public async deleteUser(id: number): Promise<void> {
+    if (!id || id <= 0) {
+      throw new ValidationError("Invalid user ID");
+    }
+
+    // Check if user exists
+    const existingUser = await UserRepository.getUserById(id);
+    if (!existingUser) {
+      throw new NotFoundError("User not found");
+    }
+
+    // Delete user
+    await UserRepository.deleteUser(id);
+  }
+
   // Transform UserModel to UserResponse
   private transformToUserResponse(user: UserModel): UserResponse {
     return {
@@ -130,4 +212,3 @@ export class UserService {
 }
 
 export const userService = new UserService();
-

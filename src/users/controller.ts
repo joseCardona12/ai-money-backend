@@ -4,6 +4,101 @@ import { AuthenticatedRequest } from "../middleware/authMiddleware";
 import { CustomError } from "../util/errors/customErrors";
 
 export class UserController {
+  // Create a new user
+  public static async createUser(
+    req: AuthenticatedRequest,
+    res: Response
+  ): Promise<void> {
+    try {
+      const {
+        fullName,
+        email,
+        password,
+        phone_number,
+        address,
+        bio,
+        profile_picture,
+        role_id,
+        provider_id,
+        plan_id,
+      } = req.body;
+
+      const newUser = await UserService.createUser({
+        fullName,
+        email,
+        password,
+        phone_number,
+        address,
+        bio,
+        profile_picture,
+        role_id,
+        provider_id,
+        plan_id,
+      });
+
+      res.status(201).json({
+        message: "User created successfully",
+        status: 201,
+        data: newUser,
+      });
+    } catch (error: unknown) {
+      if (error instanceof CustomError) {
+        res.status(error.statusCode).json({
+          message: error.message,
+          status: error.statusCode,
+          code: error.code,
+        });
+      } else {
+        console.error("Unexpected error in createUser:", error);
+        res.status(500).json({
+          message: "Internal server error",
+          status: 500,
+          code: "INTERNAL_SERVER_ERROR",
+        });
+      }
+    }
+  }
+
+  // Get all users
+  public static async getAllUsers(
+    req: AuthenticatedRequest,
+    res: Response
+  ): Promise<void> {
+    try {
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
+
+      const result = await UserService.getAllUsers(page, limit);
+
+      res.status(200).json({
+        message: "Users retrieved successfully",
+        status: 200,
+        data: result.users,
+        pagination: {
+          page,
+          limit,
+          total: result.total,
+          totalPages: Math.ceil(result.total / limit),
+        },
+      });
+    } catch (error: unknown) {
+      if (error instanceof CustomError) {
+        res.status(error.statusCode).json({
+          message: error.message,
+          status: error.statusCode,
+          code: error.code,
+        });
+      } else {
+        console.error("Unexpected error in getAllUsers:", error);
+        res.status(500).json({
+          message: "Internal server error",
+          status: 500,
+          code: "INTERNAL_SERVER_ERROR",
+        });
+      }
+    }
+  }
+
   // Get user by ID
   public static async getUserById(
     req: AuthenticatedRequest,
@@ -169,5 +264,37 @@ export class UserController {
       }
     }
   }
-}
 
+  // Delete user by ID (admin)
+  public static async deleteUserById(
+    req: AuthenticatedRequest,
+    res: Response
+  ): Promise<void> {
+    try {
+      const { id } = req.params;
+      const userId = parseInt(id, 10);
+
+      await UserService.deleteUser(userId);
+
+      res.status(200).json({
+        message: "User deleted successfully",
+        status: 200,
+      });
+    } catch (error: unknown) {
+      if (error instanceof CustomError) {
+        res.status(error.statusCode).json({
+          message: error.message,
+          status: error.statusCode,
+          code: error.code,
+        });
+      } else {
+        console.error("Unexpected error in deleteUserById:", error);
+        res.status(500).json({
+          message: "Internal server error",
+          status: 500,
+          code: "INTERNAL_SERVER_ERROR",
+        });
+      }
+    }
+  }
+}
